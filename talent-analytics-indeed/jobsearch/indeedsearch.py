@@ -11,14 +11,11 @@ Created on Jul 8, 2015
 
 @author: marcin
 '''
-
-
-
 class IndeedSearch(object):
     '''
     classdocs
     '''
-    PUBLISHER = ""
+    PUBLISHER = "3086147938612621"
     URL_HEADER_PATTERN = "http://api.indeed.com/ads/apisearch?v=2&publisher={0}&l={1}&co=pl&limit=1&q={2}"
     URL_PATTERN = "http://api.indeed.com/ads/apisearch?v=2&publisher={0}&l={1}&co=pl&limit=25&q={2}&start={3}"
 

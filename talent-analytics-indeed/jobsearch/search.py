@@ -1,10 +1,14 @@
 import datetime
 import getopt
 import os
+from glob import glob
 import random
 import string
 import sys
 import re
+import logging
+
+import xml.etree.cElementTree as ET
 
 from jobsearch.indeedsearch import IndeedSearch
 from jobsearch.filestore import FileStore
@@ -16,9 +20,12 @@ Created on Jul 8, 2015
 @author: marcin
 '''
 
-DESTINATIONPATH = "/home/marcin/Downloads/"
+DESTINATIONPATH = "/home/marcin/Downloads/indeed/"
+DOWNLOADURL = "http://pl.indeed.com/rc/clk?jk="
 
 def main():  
+    logging.basicConfig(filename=DESTINATIONPATH + 'offerdetails.log',level=logging.DEBUG, format='%(asctime)s %(message)s')
+
     query = ""
     location = ""
     
@@ -52,6 +59,30 @@ def main():
         fs = FileStore(finalPath)
         fs.saveToFile( urls[i], destinationFileName.format(str(i)) )
     
+    files = [y for x in os.walk(finalPath) for y in glob(os.path.join(x[0], '*.xml'))]
+    
+    for file in files:
+        with open (file, "r") as myfile:
+            content = myfile.read().replace('\n', '')
+            doc = ET.fromstring(content)
+
+            for elem in doc.findall(".//result"):
+                jobkey = elem.find("jobkey").text #let's suppose there is no error :)
+                url = elem.find("url").text #let's suppose there is no error :)
+                try:                    
+                    fs = FileStore(DESTINATIONPATH + 'offerdetails/')
+                    fs.saveToFile( DOWNLOADURL + jobkey, jobkey + '.html' )
+                    logging.debug(jobkey + ";original;ok")
+                except Exception as e:
+                    logging.debug(jobkey + ";original;error:" + str(e))
+                        
+                try:                    
+                    fs = FileStore(DESTINATIONPATH + 'indeedofferdetails/')
+                    fs.saveToFile( url, jobkey + '.html' )
+                    logging.debug(jobkey + ";indeed;ok")
+                except Exception as e:
+                    logging.debug(jobkey + ";indeed;error:" + str(e))
+                            
     print("End.")
 
 if __name__ == "__main__":

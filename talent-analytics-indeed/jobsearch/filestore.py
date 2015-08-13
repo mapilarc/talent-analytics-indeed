@@ -1,5 +1,4 @@
 import urllib.request
-import urllib.parse
 
 '''
 Created on Jul 9, 2015
