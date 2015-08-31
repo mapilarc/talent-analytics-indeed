@@ -7,6 +7,7 @@ import string
 import sys
 import re
 import logging
+import os.path
 
 import xml.etree.cElementTree as ET
 
@@ -69,17 +70,19 @@ def main():
             for elem in doc.findall(".//result"):
                 jobkey = elem.find("jobkey").text #let's suppose there is no error :)
                 url = elem.find("url").text #let's suppose there is no error :)
-                try:                    
-                    fs = FileStore(DESTINATIONPATH + 'offerdetails/')
-                    fs.saveToFile( DOWNLOADURL + jobkey, jobkey + '.html' )
-                    logging.debug(jobkey + ";original;ok")
+                try:
+                    if not os.path.isfile(DESTINATIONPATH + 'offerdetails/' + jobkey + '.html'):
+                        fs = FileStore(DESTINATIONPATH + 'offerdetails/')
+                        fs.saveToFile( DOWNLOADURL + jobkey, jobkey + '.html' )
+                        logging.debug(jobkey + ";original;ok")
                 except Exception as e:
                     logging.debug(jobkey + ";original;error:" + str(e))
                         
-                try:                    
-                    fs = FileStore(DESTINATIONPATH + 'indeedofferdetails/')
-                    fs.saveToFile( url, jobkey + '.html' )
-                    logging.debug(jobkey + ";indeed;ok")
+                try:
+                    if not os.path.isfile(DESTINATIONPATH + 'indeedofferdetails/' + jobkey + '.html'):                
+                        fs = FileStore(DESTINATIONPATH + 'indeedofferdetails/')
+                        fs.saveToFile( url, jobkey + '.html' )
+                        logging.debug(jobkey + ";indeed;ok")
                 except Exception as e:
                     logging.debug(jobkey + ";indeed;error:" + str(e))
                             
