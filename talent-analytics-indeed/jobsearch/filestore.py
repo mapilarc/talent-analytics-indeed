@@ -15,5 +15,14 @@ class FileStore(object):
     
     def saveToFile(self, url, destination):
         urllib.request.urlretrieve(url,self.storagePath + destination)
+    
+    def getContent(self, url):
+        f = urllib.request.urlopen(url)
+        return f.read().decode("utf8")
+    
+    def saveTextToFile(self, text, destination):
+        file = open(self.storagePath + destination, "w")
+        file.write(text)
+        file.close()
         
             

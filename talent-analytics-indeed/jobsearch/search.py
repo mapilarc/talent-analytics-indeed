@@ -1,7 +1,6 @@
 import datetime
 import getopt
-import os
-from glob import glob
+import html2text
 import random
 import string
 import sys
@@ -11,6 +10,7 @@ import os.path
 
 import xml.etree.cElementTree as ET
 
+from glob import glob
 from jobsearch.indeedsearch import IndeedSearch
 from jobsearch.filestore import FileStore
 
@@ -21,7 +21,7 @@ Created on Jul 8, 2015
 @author: marcin
 '''
 
-DESTINATIONPATH = "/home/marcin/Downloads/indeed/"
+DESTINATIONPATH = "/home/cgta/data/indeed/"
 DOWNLOADURL = "http://pl.indeed.com/rc/clk?jk="
 
 def main():  
@@ -71,18 +71,35 @@ def main():
                 jobkey = elem.find("jobkey").text #let's suppose there is no error :)
                 url = elem.find("url").text #let's suppose there is no error :)
                 try:
-                    if not os.path.isfile(DESTINATIONPATH + 'offerdetails/' + jobkey + '.html'):
+                    if (not os.path.isfile(DESTINATIONPATH + 'offerdetails/' + jobkey + '.html')) & (not os.path.isfile(DESTINATIONPATH + 'offerdetails/' + jobkey + '.html.COMPLETED')):
                         fs = FileStore(DESTINATIONPATH + 'offerdetails/')
                         fs.saveToFile( DOWNLOADURL + jobkey, jobkey + '.html' )
                         logging.debug(jobkey + ";original;ok")
+                  
+                    if (not os.path.isfile(DESTINATIONPATH + 'offerdetails_text/' + jobkey + '.xml')) & (not os.path.isfile(DESTINATIONPATH + 'offerdetails_text/' + jobkey + '.xml.COMPLETED')):    
+                    
+                        fs = FileStore(DESTINATIONPATH + 'offerdetails_text/')
+                        offerContent = html2text.html2text( fs.getContent( url ) )
+                        offerContent = '<?xml version="1.0" encoding="UTF-8"?><offer><jobkey>' + jobkey + '</jobkey><text>' + offerContent + '</text></offer>'
+                        fs.saveTextToFile( offerContent, jobkey + '.xml')
+
                 except Exception as e:
                     logging.debug(jobkey + ";original;error:" + str(e))
                         
                 try:
-                    if not os.path.isfile(DESTINATIONPATH + 'indeedofferdetails/' + jobkey + '.html'):                
+                    if ((not os.path.isfile(DESTINATIONPATH + 'indeedofferdetails/' + jobkey + '.html')) & (not os.path.isfile(DESTINATIONPATH + 'indeedofferdetails/' + jobkey + '.html.COMPLETED'))):
                         fs = FileStore(DESTINATIONPATH + 'indeedofferdetails/')
                         fs.saveToFile( url, jobkey + '.html' )
                         logging.debug(jobkey + ";indeed;ok")
+                  
+                        fs = FileStore(DESTINATIONPATH + 'indeedofferdetails_text/')
+                  
+                    if ((not os.path.isfile(DESTINATIONPATH + 'indeedofferdetails_text/' + jobkey + '.xml')) & (not os.path.isfile(DESTINATIONPATH + 'indeedofferdetails_text/' + jobkey + '.xml.COMPLETED'))):      
+                        fs = FileStore(DESTINATIONPATH + 'indeedofferdetails_text/')
+                        offerContent = html2text.html2text( fs.getContent( url ) )
+                        offerContent = '<?xml version="1.0" encoding="UTF-8"?><offer><jobkey>' + jobkey + '</jobkey><text>' + offerContent + '</text></offer>'
+                        fs.saveTextToFile( offerContent, jobkey + '.xml')
+                        
                 except Exception as e:
                     logging.debug(jobkey + ";indeed;error:" + str(e))
                             
